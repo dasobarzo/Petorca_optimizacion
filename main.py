@@ -10,103 +10,64 @@ inicio = time()
 
 A = range(1,5) #centro de carga de agua
 C = range(1,4) #conjunto de camiones
-P = range(1,4) #conjunto de APR
-R = range(1,120) #conjunto de estanques
+P = range(1,1) #conjunto de APR
+R = range(1,4) #conjunto de estanques
 S = range(1,52) #tiempo en semanas
 D = range(1,7) #dias de semana
 
-# Demanda exportada del excel al azar
-datos_demanda = pd.read_excel("Resultados_demanda.xlsx", engine="openpyxl")
-datos_distancia = pd.read_excel("Resultados_distancia.xlsx", engine="openpyxl")
+lista_nodos = [(i, j) for i in range(1, 121) for j in range(1, 121)]
+
+# Limitar la lista a los primeros 120 nodos
+lista_nodos = lista_nodos[:120]
+
+# Imprimir los primeros 5 para verificar
+for nodo in lista_nodos[:300]:
+    print(nodo)
+
+j = [(1, 2), (1, 3), (2, 1), (2, 3),(3,1),(3,2)]
+M = tuple(j)  # Convertir la lista de listas en una tupla de tuplas
+
 
 # Demanda exportada del excel al azar
-datos_demanda = pd.read_excel("Resultados_demanda_por_tipo_de_hormigon.xlsx", engine="openpyxl")
-datos_distancia = pd.read_excel("Resultados_distancia_por_tipo_hormigon.xlsx", engine="openpyxl")
+#datos_demanda = pd.read_excel("Resultados_demanda.xlsx", engine="openpyxl")
+#datos_distancia = pd.read_excel("Resultados_distancia.xlsx", engine="openpyxl")
+
+# Demanda exportada del excel al azar
+#datos_demanda = pd.read_excel("Resultados_demanda_por_tipo_de_hormigon.xlsx", engine="openpyxl")
+#datos_distancia = pd.read_excel("Resultados_distancia_por_tipo_hormigon.xlsx", engine="openpyxl")
 
 presupuesto_por_dia = ((37500 * 40) + (4*22*2*114)*40 + (4*22*2*455)*0)
 agua_por_tipo_de_estanque = [10000, 15000, 0.12046]
 
-#Definición de parámetros
-# Distancias en kilómetros
-L_m1 = # Distancia entre estanques r1 y r2
-L_m2 =  # Distancia entre un estanque y un APR
-L_m3 = # Distancia entre un estanque y un centro de carga
-L_m4 =   # Distancia entre dos APRs
-L_m5 =  # Distancia entre un APR y un centro de carga
-L_m6 =  # Distancia entre centros de carga
+def buscar_distancia(r1, r2):
+    return 10
 
-# Capacidades
-K_c = 15000 # Capacidad del camión c en litros
-DE_rs = # Demanda de agua en el estanque r en la semana s
-DA_psd =  # Demanda de agua en el APR p en la semana s
-
-# Presupuestos y almacenamiento
-PT_s =   # Presupuesto en la semana s
-KE_r =  # Capacidad del estanque r en litros
-KA_p = # Capacidad del APR p en litros
-O_as =  # Oferta de agua en el centro a en la semana s
-
-# Sueldos y costos
-Z = 162500 # Sueldo del camionero en CLP
-CD = 1013 # Costo por litro de combustible diesel
-CPL = CD *  # Costo por kilometro de un camión aljíbe
-PA_a = 1040/1000 # Costo por litro de agua en un centro a
-
-# Modelo vacio 
-model = Model() 
-
-from gurobipy import GRB, Model
-from gurobipy import quicksum
-from random import randint
-import pandas as pd
-import matplotlib.pyplot as plt
-from time import time
-inicio = time()
-
-# definimos data: conjuntos y data 
-
-A = range(1,5) #centro de carga de agua
-C = range(1,4) #conjunto de camiones
-P = range(1,4) #conjunto de APR
-R = range(1,120) #conjunto de estanques
-S = range(1,52) #tiempo en semanas
-D = range(1,7) #dias de semana
-
-# Demanda exportada del excel al azar
-datos_demanda = pd.read_excel("Resultados_demanda.xlsx", engine="openpyxl")
-datos_distancia = pd.read_excel("Resultados_distancia.xlsx", engine="openpyxl")
-
-# Demanda exportada del excel al azar
-datos_demanda = pd.read_excel("Resultados_demanda_por_tipo_de_hormigon.xlsx", engine="openpyxl")
-datos_distancia = pd.read_excel("Resultados_distancia_por_tipo_hormigon.xlsx", engine="openpyxl")
-
-presupuesto_por_dia = ((37500 * 40) + (4*22*2*114)*40 + (4*22*2*455)*0)
-agua_por_tipo_de_estanque = [10000, 15000, 0.12046]
 
 #Definición de parámetros
 # Distancias en kilómetros
-L_m1 = # Distancia entre estanques r1 y r2
-L_m2 =  # Distancia entre un estanque y un APR
-L_m3 = # Distancia entre un estanque y un centro de carga
-L_m4 =   # Distancia entre dos APRs
-L_m5 =  # Distancia entre un APR y un centro de carga
-L_m6 =  # Distancia entre centros de carga
+L_m1 = 10 # Distancia entre estanques r1 y r2
+L_m2 =  10# Distancia entre un estanque y un APR
+L_m3 = 10# Distancia entre un estanque y un centro de carga
+L_m4 =  10 # Distancia entre dos APRs
+L_m5 =  10# Distancia entre un APR y un centro de carga
+L_m6 =  10# Distancia entre centros de carga
 
 # Capacidades
 K_c = 15000 # Capacidad del camión c en litros
-DE_rs = # Demanda de agua en el estanque r en la semana s
-DA_psd =  # Demanda de agua en el APR p en la semana s
+DE_rs = 10 # Demanda de agua en el estanque r en la semana s ------------------
+DA_psd = 10 # Demanda de agua en el APR p en la semana s---------------
 
 # Presupuestos y almacenamiento
-PT_s =   # Presupuesto en la semana s
-KE_r =  # Capacidad del estanque r en litros
-KA_p = # Capacidad del APR p en litros
-O_as =  # Oferta de agua en el centro a en la semana s
+PT_s =  12 # Presupuesto en la semana s --------------------
+KE_r =  14# Capacidad del estanque r en litros --------------------
+KA_p = 12# Capacidad del APR p en litros --------------------
+O_as =  10 # Oferta de agua en el centro a en la semana s --------------------
 
 # Sueldos y costos
 lmbda = 162500 # Sueldo del camionero en CLP
-CPL = # Costo por litro de diésel por kilómetro del camión ajíbe
-CD = # Costo por litro de camión eléctrico por kilómetro
+CD = 1035 # Costo por litro de combustible diesel
+CPL = 100/40 # Autonomía, kms recorridos por litro de combustible en un camión aljíbe  -------------------- *    ----->
+
 PA_a = 1040/1000 # Costo por litro de agua en un centro a
 
 # Modelo vacio 
@@ -138,18 +99,32 @@ U = model.addVars(C, M, D, vtype=GRB.BINARY, name="u_cmd")
 # Optimizar el modelo
 model.optimize()
 
+
+# Crear la variable de decisión U con los índices (i, j) separados
+#U = model.addVars(C, range(1, 6), range(1, 6), D, vtype=GRB.BINARY, name="u_cmd")
+
+# Definir la función objetivo correctamente
 obj = quicksum(
-    quicksum(CD / CPL * (                                                # revisar como vamos a usar el L_m
-        quicksum(quicksum(L_m1  * U[c, m, d] for m in M) for d in D) +   # podriamos hacer lo mismo para cada L_m1,2,3...
-        quicksum(quicksum(LC[c, a, s, d] * PA_a[a] for a in A) for d in D) # revisar el m in M
-    ) + 2 * lmbda[c] #revisar el lambda, es fijo entonces como se suma con subindice c
-    for c in C) 
-for s in S)
+    quicksum(
+        CD * CPL * (                                                                                                            #------>
+            quicksum(L_m1 * U[c, i, j, d] for i, j in M for d in D) +  # Descomponer `m` en `i, j`
+            quicksum(LC[c, a, s, d] * PA_a for a in A for d in D)   # Litros cargados y costo por agua
+        ) + 2 * lmbda  # El salario del camionero (si es fijo, no debe tener subíndice `c`)
+    for c in C)  # Cierra la suma por cada camión
+for s in S)  # Cierra la suma por cada semana
+
+
+
+# Definir la función objetivo
+model.setObjective(obj, GRB.MINIMIZE)
+model.update()
+
 
 # Definir la función objetivo en el modelo
 model.setObjective(obj, GRB.MINIMIZE)
 # Update
 model.update()
+
 
 # Restricciones
 
@@ -160,8 +135,7 @@ model.update()
 
 
 
-
-''''
+'''
 
 ######################### NO TOCAR ANTIGUOOOOOOOOOO ##################################
 
@@ -330,3 +304,4 @@ print(f"El programa se demoro {duracion_minutos} minutos")
 #with pd.ExcelWriter('resultados_hormigon_transportado.xlsx') as writer:
 #    df_electricos.to_excel(writer, sheet_name='Electricos')
 #    df_diesel.to_excel(writer, sheet_name='Diesel')
+'''
