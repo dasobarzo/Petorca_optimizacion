@@ -48,6 +48,63 @@ O_as =  # Oferta de agua en el centro a en la semana s
 
 # Sueldos y costos
 Z = 162500 # Sueldo del camionero en CLP
+CD = 1013 # Costo por litro de combustible diesel
+CPL = CD *  # Costo por kilometro de un camión aljíbe
+PA_a = 1040/1000 # Costo por litro de agua en un centro a
+
+# Modelo vacio 
+model = Model() 
+
+from gurobipy import GRB, Model
+from gurobipy import quicksum
+from random import randint
+import pandas as pd
+import matplotlib.pyplot as plt
+from time import time
+inicio = time()
+
+# definimos data: conjuntos y data 
+
+A = range(1,5) #centro de carga de agua
+C = range(1,4) #conjunto de camiones
+P = range(1,4) #conjunto de APR
+R = range(1,120) #conjunto de estanques
+S = range(1,52) #tiempo en semanas
+D = range(1,7) #dias de semana
+
+# Demanda exportada del excel al azar
+datos_demanda = pd.read_excel("Resultados_demanda.xlsx", engine="openpyxl")
+datos_distancia = pd.read_excel("Resultados_distancia.xlsx", engine="openpyxl")
+
+# Demanda exportada del excel al azar
+datos_demanda = pd.read_excel("Resultados_demanda_por_tipo_de_hormigon.xlsx", engine="openpyxl")
+datos_distancia = pd.read_excel("Resultados_distancia_por_tipo_hormigon.xlsx", engine="openpyxl")
+
+presupuesto_por_dia = ((37500 * 40) + (4*22*2*114)*40 + (4*22*2*455)*0)
+agua_por_tipo_de_estanque = [10000, 15000, 0.12046]
+
+#Definición de parámetros
+# Distancias en kilómetros
+L_m1 = # Distancia entre estanques r1 y r2
+L_m2 =  # Distancia entre un estanque y un APR
+L_m3 = # Distancia entre un estanque y un centro de carga
+L_m4 =   # Distancia entre dos APRs
+L_m5 =  # Distancia entre un APR y un centro de carga
+L_m6 =  # Distancia entre centros de carga
+
+# Capacidades
+K_c = 15000 # Capacidad del camión c en litros
+DE_rs = # Demanda de agua en el estanque r en la semana s
+DA_psd =  # Demanda de agua en el APR p en la semana s
+
+# Presupuestos y almacenamiento
+PT_s =   # Presupuesto en la semana s
+KE_r =  # Capacidad del estanque r en litros
+KA_p = # Capacidad del APR p en litros
+O_as =  # Oferta de agua en el centro a en la semana s
+
+# Sueldos y costos
+lmbda = 162500 # Sueldo del camionero en CLP
 CPL = # Costo por litro de diésel por kilómetro del camión ajíbe
 CD = # Costo por litro de camión eléctrico por kilómetro
 PA_a = 1040/1000 # Costo por litro de agua en un centro a
@@ -56,14 +113,41 @@ PA_a = 1040/1000 # Costo por litro de agua en un centro a
 model = Model()
 
 # Variables de decision 
-x = model.addVars(R, C, T, S, vtype = GRB.BINARY, name = "x_rcts") # 1 si el camión eléctrico es usado el día t en la semana s por el cliente c, con c  C,  t  T,  s  S ; 0 EOC
-y = model.addVars(Q, C, T, S, vtype = GRB.BINARY, name = "y_qcts") # 1 si el camión diesel es usado el día t en la semana s por el cliente c, con c  C,  t  T,  s  S;  0 EOC
-zx = model.addVars(C, R, T, X, S, vtype = GRB.INTEGER, name = "zx_rtxs") # Cantidad de kilogramos de hormigón de tipo x transportado por  el camión eléctrico q en el día t en la semana s, con t  T, x  X, s  S
-zy = model.addVars(C, Q, T, X, S, vtype = GRB.INTEGER, name = "zy_qtxs") # Cantidad de kilogramos de hormigón de tipo x transportado por camiones diésel en el día t en la semana s, con t  T, x  X, s  S
-wx = model.addVars(C, R, T, X, S, vtype = GRB.BINARY, name = "wx_crtxs") # 1 si el camión eléctrico r transporta hormigón de tipo x el día t de la semana s hacia el cliente c, 0 EOC.
-wy = model.addVars(C, Q, T, X, S, vtype = GRB.BINARY, name = "wx_cqtxs") # 1 si el camión diésel q transporta hormigón de tipo x el día t de la semana s hacia el cliente c, 0 EOC.
+# x_csdr si el camion c se va a llenar al centro a en la semana s el día d
+X = model.addVars(C, A, S, D, vtype=GRB.BINARY, name="x_csdr")
+# y_csdr si el camion c en el dia d de la semana s va a llenar agua al estanque r
+Y = model.addVars(C, S, D, R, vtype=GRB.BINARY, name="y_csdr")
+# z_csdp si el camión c en el dia d de la semana s va a llenar agua al APR p
+Z = model.addVars(C, S, D, P, vtype=GRB.BINARY, name="z_csdp")
+# lc_casd litros de agua cargados al camion c en el centro a en la semana s del dia d
+LC = model.addVars(C, A, S, D, vtype=GRB.CONTINUOUS, name="lc_casd")
+# le_csdr agua entregada en litros por el camion c en la semana s del dia d al estanque r
+LE = model.addVars(C, S, D, R, vtype=GRB.CONTINUOUS, name="le_csdr")
+# lea_csdp agua entregada en litros por el camion c en la semana s del dia d al APR p
+LEA = model.addVars(C, S, D, P, vtype=GRB.CONTINUOUS, name="lea_csdp")
+# kr_rd si el sensor del estanque r se enciende en el dia d
+Kr = model.addVars(R, D, vtype=GRB.BINARY, name="kr_rd")
+# kp_pd si el sensor del APR p se enciende en el dia d
+Kp = model.addVars(P, D, vtype=GRB.BINARY, name="kp_pd")
+# cf_cds si el camion c funciona en el dia d de la semana s
+CF = model.addVars(C, D, S, vtype=GRB.BINARY, name="cf")
+# u_cmd si el camion c utiliza el arco (i,j) en el dia d
+U = model.addVars(C, M, D, vtype=GRB.BINARY, name="u_cmd")
 
 
+# Optimizar el modelo
+model.optimize()
+
+obj = quicksum(
+    quicksum(CD / CPL * (                                                # revisar como vamos a usar el L_m
+        quicksum(quicksum(L_m1  * U[c, m, d] for m in M) for d in D) +   # podriamos hacer lo mismo para cada L_m1,2,3...
+        quicksum(quicksum(LC[c, a, s, d] * PA_a[a] for a in A) for d in D) # revisar el m in M
+    ) + 2 * lmbda[c] #revisar el lambda, es fijo entonces como se suma con subindice c
+    for c in C) 
+for s in S)
+
+# Definir la función objetivo en el modelo
+model.setObjective(obj, GRB.MINIMIZE)
 # Update
 model.update()
 
@@ -77,7 +161,7 @@ model.update()
 
 
 
-
+''''
 
 ######################### NO TOCAR ANTIGUOOOOOOOOOO ##################################
 
