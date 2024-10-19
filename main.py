@@ -4,57 +4,36 @@ from random import randint
 import pandas as pd
 import matplotlib.pyplot as plt
 from time import time
+from inventario import inventario_estanques
+from pandas import ExcelWriter
 inicio = time()
 
 # definimos data: conjuntos y data 
 
 A = range(1,5) #centro de carga de agua
 C = range(1,4) #conjunto de camiones
-P = range(1,1) #conjunto de APR
-R = range(1,4) #conjunto de estanques
+P = range(1,4) #conjunto de APR
+R = range(1,120) #conjunto de estanques
 S = range(1,52) #tiempo en semanas
 D = range(1,7) #dias de semana
 
-lista_nodos = [(i, j) for i in range(1, 121) for j in range(1, 121)]
-
-# Limitar la lista a los primeros 120 nodos
-lista_nodos = lista_nodos[:120]
-
-# Imprimir los primeros 5 para verificar
-for nodo in lista_nodos[:300]:
-    print(nodo)
-
-j = [(1, 2), (1, 3), (2, 1), (2, 3),(3,1),(3,2)]
-M = tuple(j)  # Convertir la lista de listas en una tupla de tuplas
-
+M = [(i, j) for i in range(1, 121) for j in range(1, 121) if i != j]
 
 # Demanda exportada del excel al azar
-#datos_demanda = pd.read_excel("Resultados_demanda.xlsx", engine="openpyxl")
-#datos_distancia = pd.read_excel("Resultados_distancia.xlsx", engine="openpyxl")
+datos_demanda_diaria = pd.read_excel("demandas_diaria.xlsx", engine="openpyxl")
+datos_distancia = pd.read_excel("distancias_permanentes.xlsx", engine="openpyxl")
+datos_estanques_familias = pd.read_excel("estanques_de_familias.xlsx", engine="openpyxl")
 
-# Demanda exportada del excel al azar
-#datos_demanda = pd.read_excel("Resultados_demanda_por_tipo_de_hormigon.xlsx", engine="openpyxl")
-#datos_distancia = pd.read_excel("Resultados_distancia_por_tipo_hormigon.xlsx", engine="openpyxl")
-
-presupuesto_por_dia = ((37500 * 40) + (4*22*2*114)*40 + (4*22*2*455)*0)
-agua_por_tipo_de_estanque = [10000, 15000, 0.12046]
-
-def buscar_distancia(r1, r2):
-    return 10
-
+presupuesto_por_semana = 15566072               #((162500 * 4) + (4*22*2*114)*40 + (4*22*2*455)*0)
+agua_por_tipo_de_estanque = [2890,4334,5779,7224]
 
 #Definición de parámetros
 # Distancias en kilómetros
-L_m1 = 10 # Distancia entre estanques r1 y r2
-L_m2 =  10# Distancia entre un estanque y un APR
-L_m3 = 10# Distancia entre un estanque y un centro de carga
-L_m4 =  10 # Distancia entre dos APRs
-L_m5 =  10# Distancia entre un APR y un centro de carga
-L_m6 =  10# Distancia entre centros de carga
+L_m1 = datos_distancia # Distancia entre estanques r1 y r2
 
 # Capacidades
 K_c = 15000 # Capacidad del camión c en litros
-DE_rs = 10 # Demanda de agua en el estanque r en la semana s ------------------
+DE_rsd = 10 # Demanda de agua en el estanque r en la semana s ------------------    aqui agregue d
 DA_psd = 10 # Demanda de agua en el APR p en la semana s---------------
 
 # Presupuestos y almacenamiento
@@ -64,14 +43,15 @@ KA_p = 12# Capacidad del APR p en litros --------------------
 O_as =  10 # Oferta de agua en el centro a en la semana s --------------------
 
 # Sueldos y costos
-lmbda = 162500 # Sueldo del camionero en CLP
+lmbda = 162500 # Sueldo del camionero en CLP 
 CD = 1035 # Costo por litro de combustible diesel
 CPL = 100/40 # Autonomía, kms recorridos por litro de combustible en un camión aljíbe  -------------------- *    ----->
 
-PA_a = 1040/1000 # Costo por litro de agua en un centro a
+PA_a = [17.31,10.871,11.444,5.541,17.697] # Costo por litro de agua en un centro a
 
 # Modelo vacio 
 model = Model()
+
 
 # Variables de decision 
 # x_csdr si el camion c se va a llenar al centro a en la semana s el día d
@@ -96,19 +76,61 @@ CF = model.addVars(C, D, S, vtype=GRB.BINARY, name="cf")
 U = model.addVars(C, M, D, vtype=GRB.BINARY, name="u_cmd")
 
 
+model.update()
+
+# Restricciones
+
+
+#1,Cada camion c ∈ C debe ir a recargar APR p ∈ P y estanque r ∈ R como maximo 6 veces en un día d ∈ D.
+model.addConstrs(((quicksum(Y[c,s,d,r] for r in R)+quicksum(Z[c,s,d,p] for p in P)) <= 6 for c in C for d in D), name = "R1") #revisar subindice s
+#2. Para transportar agua debe haber un camion c ∈ C disponible para hacerlo.
+model.addConstrs((X[c,a,s,d]+Y[c,s,d,r]+Z[c,s,d,p] <= 1 for c in C), name ="R2") #que hacemos con los subindices????
+#3.-
+model.addConstrs((quicksum(DE_rs[r, s] for s in S) <= quicksum(quicksum(LE[c, s, d, r] for c in C) for d in D) for r in R for s in S), name="R3.1")
+model.addConstrs((quicksum(DA_psd[p, s, d] for d in D) <= quicksum(quicksum(LEA[c, s, d, p] for c in C) for d in D) for p in P for s in S), name="R3.2")
+#4.-
+model.addConstrs((quicksum(quicksum(LC[a, c, d, s] for c in C) for d in D) <= O_as[a, s]for a in A for s in S), name="R4")
+#5.-
+model.addConstrs((quicksum(LC[a, c, d, s] for a in A) == quicksum(LE[c, s, d, r] for r in R) + quicksum(LEA[c, s, d, p] for p in P)for c in C for d in D for s in S),name="R5")
+#6.-
+model.addConstrs((LC[a, c, d, s] <= K[c] * X[c, a, s, d] for c in C for a in A for s in S for d in D),name="R6")
+#7.
+model.addConstrs((Kr[r, d, s] == Y[c, s, d + 1, r]for c in C for r in R for d in range(1, 7) for s in S),name="R7")
+model.addConstrs((Kr[r, 7, s] == Y[c, s + 1, 1, r]for c in C for r in R for s in S if s + 1 <= len(S)),name="R7.1")
+model.addConstrs((quicksum(Kr[r, d, s] for d in D) <= 1 for r in R for s in S),name="R7.2")
+#8.-
+model.addConstrs((Kp[p, d, s] == Z[c, s, d + 1, p] for c in C for p in P for d in range(1, 7) for s in S),name="R8.1")
+model.addConstrs((Kp[p, 7, s] == Z[c, s + 1, 1, p] for c in C for p in P for s in S),name="R8.2")
+
+#9.-
+model.addConstrs((Kr[r, d, s] == CF[c, d, s] for c in C for d in D for s in S for r in R),name="R9")
+#10.-
+model.addConstrs((LE[c, s, d, r] <= K_c[c] * Y[c, s, d, r] for c in C for r in R for d in D for s in S),name="R10.1")
+model.addConstrs((LEA[c, s, d, p] <= K_c[c] * Z[c, s, d, p] for c in C for p in P for d in D for s in S),name="R10.2")
+#11.-
+model.addConstrs((quicksum(Y[c, s, d, r] for c in C for d in D) <= 1 for r in R for s in S),name="R11")
+
+#12.-
+model.addConstrs((quicksum(U[c, m, d, v] for m in REVISAR) == CF[c, d, s] for c in C for d in D for s in S for v in V),name="R12")
+#13.-
+
+'''
+model.addConstrs((quicksum(U[c, m, d, v] for m in nodos entrada) == Y[c, s, d, r] for c in C for m in revisar for d in D for s in S for r in R),name="R13.1")
+model.addConstrs((quicksum(U[c, m, d, v] for m in nodos entrada) == Z[c, s, d, p] for c in C for m in revisar for d in D for s in S for p in P),name="R13.2")
+#14.-
+model.addConstrs((quicksum(U[c, m, d, v] for m in nodos salida) == Y[c, s, d, r] for c in C for m in N if m != A for d in D for s in S for r in R),name="R14.1")
+model.addConstrs((quicksum(U[c, m, d, v] for m in nodos salida) == Z[c, s, d, p] for c in C for m in N if m != A for d in D for s in S for p in P),name="R14.2")
+'''
+model.update()
 # Optimizar el modelo
 model.optimize()
 
-
-# Crear la variable de decisión U con los índices (i, j) separados
-#U = model.addVars(C, range(1, 6), range(1, 6), D, vtype=GRB.BINARY, name="u_cmd")
-
-# Definir la función objetivo correctamente
+#función objetivo
 obj = quicksum(
     quicksum(
         CD * CPL * (                                                                                                            #------>
-            quicksum(L_m1 * U[c, i, j, d] for i, j in M for d in D) +  # Descomponer `m` en `i, j`
-            quicksum(LC[c, a, s, d] * PA_a for a in A for d in D)   # Litros cargados y costo por agua
+            quicksum(L_m1[i][j] * U[c, i, j, d] for i, j in M for d in D) +  # Descomponer `m` en `i, j`
+            quicksum(LC[c, a, s, d] * PA_a[a] for a in A for d in D)   # Litros cargados y costo por agua
         ) + 2 * lmbda  # El salario del camionero (si es fijo, no debe tener subíndice `c`)
     for c in C)  # Cierra la suma por cada camión
 for s in S)  # Cierra la suma por cada semana
@@ -117,21 +139,6 @@ for s in S)  # Cierra la suma por cada semana
 
 # Definir la función objetivo
 model.setObjective(obj, GRB.MINIMIZE)
-model.update()
-
-
-# Definir la función objetivo en el modelo
-model.setObjective(obj, GRB.MINIMIZE)
-# Update
-model.update()
-
-
-# Restricciones
-
-
-
-
-
 
 
 
