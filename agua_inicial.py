@@ -16,7 +16,7 @@ APR = datos_familias['APR'].dropna().astype(int).tolist()
 demandas_totales = []
 demandas = []
 num_total=[]
-for s in range(1):  #semanas
+for d in range(1):  #semanas
     sublista = []
     num = []
     for c in range(1, 130):  #clientes
@@ -77,7 +77,7 @@ for s in range(1):  #semanas
 
     # Agregar una columna indicando el número de semana y la demanda de cada cliente
     for num_total, demanda in enumerate(sublista):
-        demandas_totales.append({"Semana": s+1,"Estanque": num_total+1, "Agua_inicial": demanda})
+        demandas_totales.append({"Dia": d+1,"Estanque": num_total+1, "Agua_inicial": demanda})
 
 # Convertir a DataFrame
 df_demandas = pd.DataFrame(demandas_totales)

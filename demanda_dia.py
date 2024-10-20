@@ -17,95 +17,95 @@ datos_demanda_inicial = pd.read_excel("agua_inicial.xlsx", engine="openpyxl")
 demandas_totales = []
 demandas = []
 demanda_semanal = [2890,4334,5779,7224]
-for s in range(52):  #semanas
-
-    for d in range(7): #dia
-
-        sublista = []
-        for c in range(1, 125):  #clientes
-            if c in familia_2_valores:
-            # Quiero un numero que sea 30% un valor y 70% de probabilidad otro valor
-                if random.random() < 0.2: #NO SE ACTIVA NO VAMOS!!!
-                    n=2311//7
-                    sublista.append(random.randint(0,n))
-                else: #voyyyy
-                    n=2312//7
-                    m = 2890//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(2312,2890/7))
-            elif c in familia_3_valores:
-                if random.random() < 0.2:
-                    n=3466//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=3467//7
-                    m = 4334//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(3467/7,4334/7))
-            elif c in familia_4_valores:
-                if random.random() < 0.2:
-                    n=4622//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=4623//7
-                    m = 5779//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(4623/7,5779/7))
-            elif c in familia_5_valores:
-                if random.random() < 0.2:
-                    n=5778//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=5779//7
-                    m = 7224//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(5779/7,7224/7))
-            elif c == APR[1-1]:
-                if random.random() < 0.2:
-                    n=9999//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=10000//7
-                    m =12500//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(10000/7,12500/7))
-            elif c == APR[2-1]:
-                if random.random() < 0.2:
-                    n=23999//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=24000//7
-                    m = 30000//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(24000/7,30000/7))
-            elif c == APR[3-1]:
-                if random.random() < 0.2:
-                    n=39999//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=4000//7
-                    m = 5000//7
-                    sublista.append(random.randint(n,m))
-                    #sublista.append(random.randint(40000,50000))
-            elif c == APR[4-1]:
-                if random.random() < 0.2:
-                    n=7999//7
-                    sublista.append(random.randint(0, n))
-                else:
-                    n=8000//7
-                    m = 10000//7
-                    sublista.append(random.randint(n,m))
-        
-        demandas.append(sublista)
 
 
+for d in range(1,(7*52)+1): #dia
 
-    # Agregar una columna indicando el número de semana y la demanda de cada cliente
-        for idx, demanda in enumerate(sublista):
-            demandas_totales.append({"Semana": s+1, "dia": d+1,"Estanque": idx+1, "Consumo": demanda})
+    sublista = []
+    for c in range(1, 125):  #clientes
+        if c in familia_2_valores:
+        # Quiero un numero que sea 30% un valor y 70% de probabilidad otro valor
+            if random.random() < 0.1: #NO SE ACTIVA NO VAMOS!!!
+                n=2311//7
+                sublista.append(random.randint(0,n))
+            else: #voyyyy
+                n=2312//7
+                m = 2890//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(2312,2890/7))
+        elif c in familia_3_valores:
+            if random.random() < 0.1:
+                n=3466//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=3467//7
+                m = 4334//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(3467/7,4334/7))
+        elif c in familia_4_valores:
+            if random.random() < 0.1:
+                n=4622//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=4623//7
+                m = 5779//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(4623/7,5779/7))
+        elif c in familia_5_valores:
+            if random.random() < 0.1:
+                n=5778//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=5779//7
+                m = 7224//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(5779/7,7224/7))
+        elif c == APR[1-1]:
+            if random.random() < 0.1:
+                n=9999//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=10000//7
+                m =12500//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(10000/7,12500/7))
+        elif c == APR[2-1]:
+            if random.random() < 0.1:
+                n=23999//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=24000//7
+                m = 30000//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(24000/7,30000/7))
+        elif c == APR[3-1]:
+            if random.random() < 0.1:
+                n=39999//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=4000//7
+                m = 5000//7
+                sublista.append(random.randint(n,m))
+                #sublista.append(random.randint(40000,50000))
+        elif c == APR[4-1]:
+            if random.random() < 0.1:
+                n=7999//7
+                sublista.append(random.randint(0, n))
+            else:
+                n=8000//7
+                m = 10000//7
+                sublista.append(random.randint(n,m))
+    
+    demandas_totales.append(sublista)
 
-# Convertir a DataFrame
-df_demandas = pd.DataFrame(demandas_totales)
 
-# Guardar el DataFrame completo en una sola hoja de Excel
+# Convertir las demandas totales en un DataFrame, empezando columnas desde 1
+df_demandas = pd.DataFrame(demandas_totales, columns=[i for i in range(1, 125)])
+
+# Guardar el DataFrame en un archivo Excel
 df_demandas.to_excel("demandas_diaria.xlsx", index=False)
+
+# Ejemplo de acceso a un valor específico (por fila y columna, empezando desde 1)
+# Acceder a la demanda del día 1 para el cliente 5 (columna 5, fila 1)
+valor_demanda_cliente_5_dia_1 = df_demandas.iloc[0, 4]  # Fila 0 (día 1), Columna 4 (cliente 5)
+print(f"Demanda del cliente 5 en el día 1: {valor_demanda_cliente_5_dia_1}")

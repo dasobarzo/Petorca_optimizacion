@@ -12,7 +12,7 @@ grupos = {
 }
 
 # Generar una lista de posiciones del 1 al 120
-posiciones = list(range(1, 125))
+posiciones = list(range(1, 121))
 
 random.shuffle(posiciones)
 
@@ -21,7 +21,7 @@ familias_2 = posiciones[:grupos['2']]
 familias_3 = posiciones[grupos['2']:grupos['2'] + grupos['3']]
 familias_4 = posiciones[grupos['2'] + grupos['3']:grupos['2'] + grupos['3'] + grupos['4']]
 familias_5 = posiciones[grupos['2'] + grupos['3'] + grupos['4']:grupos['2'] + grupos['3'] + grupos['4'] + grupos['5']]
-APR = posiciones[grupos['2'] + grupos['3'] + grupos['4'] + grupos['5']:grupos['2'] + grupos['3'] + grupos['4'] + grupos['5'] + grupos['APR']]
+APR = [121,122,123,124]
 CC = [125,126,127,128,129]
 
 #DataFrame
