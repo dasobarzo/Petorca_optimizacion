@@ -83,8 +83,8 @@ for d in range(1,(7*52)+1): #dia
                 n=39999//7
                 sublista.append(random.randint(0, n))
             else:
-                n=4000//7
-                m = 5000//7
+                n=40000//7
+                m = 50000//7
                 sublista.append(random.randint(n,m))
                 #sublista.append(random.randint(40000,50000))
         elif c == APR[4-1]:
