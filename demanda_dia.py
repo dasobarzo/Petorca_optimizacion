@@ -99,13 +99,12 @@ for d in range(1,(7*52)+1): #dia
     demandas_totales.append(sublista)
 
 
-# Convertir las demandas totales en un DataFrame, empezando columnas desde 1
-df_demandas = pd.DataFrame(demandas_totales, columns=[i for i in range(1, 125)])
+# Guardar los resultados en un archivo Excel
+nombres_nodos = [f'{i + 1}' for i in range(124)]
 
-# Guardar el DataFrame en un archivo Excel
-df_demandas.to_excel("demandas_diaria.xlsx", index=False)
+# Crear el DataFrame y definir el índice de 1 a 364
+df = pd.DataFrame(demandas_totales, columns=nombres_nodos, index=range(1, 365))
 
-# Ejemplo de acceso a un valor específico (por fila y columna, empezando desde 1)
-# Acceder a la demanda del día 1 para el cliente 5 (columna 5, fila 1)
-valor_demanda_cliente_5_dia_1 = df_demandas.iloc[0, 4]  # Fila 0 (día 1), Columna 4 (cliente 5)
-print(f"Demanda del cliente 5 en el día 1: {valor_demanda_cliente_5_dia_1}")
+# Guardar los resultados en un archivo Excel
+nombre_archivo = 'demanda_diaria.xlsx'
+df.to_excel(nombre_archivo, float_format="%.4f")
