@@ -13,12 +13,12 @@ R = range(1,10) #conjunto de estanque
 D = range(1,10) #dias * semana
 
 A = range(125,130) #centro de carga de agua
-C = range(1,5) #conjunto de camiones                                   ------------------>
+C = range(1,20) #conjunto de camiones                                   ------------------>
 P = range(121,125) #conjunto de APR
 #R = range(1,121) #conjunto de estanque
 #D = range(1,365) #dias * semana
 V = range(1,14) #viajes
-N = range(1, 130)
+N = range(1, 19) #130
 M = [(i, j) for i in N for j in N if i != j]  #grafos
 DEl1 = [(a,j) for a in A for j in N if a!=j]  #deltaA+
 DEl2 = [(j,a) for j in N for a in A if a!=j]  #deltaA-
@@ -26,7 +26,6 @@ DEl3 = [(r,j) for r in R for j in N if r!=j]  #deltaR+
 DEl4 = [(j,r) for j in N for r in R if r!=j]  #deltaR-
 DEl5 = [(p,j) for p in P for j in N if p!=j]  #deltaP+
 DEl6 = [(j,p) for j in N for p in P if p!=j]  #deltaP-
-
 
 
 #datas
@@ -51,14 +50,18 @@ DA_pd = {
     for i, fila in datos_demanda_diaria.iterrows()} # Demanda de agua en el APR P en el dia d
 PT = 15566072/7        #PRESUPUESTO
 KE_r = datos_capacidad['Capacidad']  # Capacidad del estanque r en litros 
-#print(KE_r.iloc[1])
-KA_p = [12500, 30000, 50000, 10000]# Capacidad del APR p en litros 
-O_a =  [120000/7,120000/7,120000/7,120000/7,120000/7] # Oferta de agua en el centro a en el dia d
+print(KE_r.iloc[1])
+KA_p = {121: 12500, 122: 30000, 123: 50000, 124: 10000}# Capacidad del APR p en litros 
+O_a = {125: 120000/7, 126: 120000/7, 127: 120000/7, 128: 120000/7, 129: 120000/7}
+print(O_a[125])
+#print(lista_indices)
+# Oferta de agua en el centro a en el dia d
 lambda1 = 162500/7 # Sueldo del camionero en CLP 
 CPL = 100/40 # Autonomía, kms recorridos por litro de combustible en un camión aljíbe
 CD = 1035 # Costo por litro de combustible diesel
-PA_a = [17.31, 10.871, 11.444, 5.541, 17.697] # Costo por litro de agua en un centro a
+PA_a = {125: 17.31, 126: 10.871, 127: 11.444, 128: 5.541, 129: 17.697} # Costo por litro de agua en un centro a
 AIE_r = datos_agua_inicial['Agua_inicial']
+
 AIA_p = datos_agua_inicial['Agua_inicial']
 
 # Modelo vacio 
@@ -101,12 +104,12 @@ model.addConstrs(((quicksum(quicksum(U[c,i,j,d,v] for v in V) for (i,j) in M)) <
 model.addConstrs((quicksum(X[c,a,d] for a in A)+ quicksum(Y[c,d,r] for r in R) + quicksum(Z[c,d,p] for p in P) <= 1 for c in C for d in D), name ="R2") 
 
 #3. La demanda de agua en litros del dia d ∈ D debe ser menor o igual a la cantidad de agua entregada por un camión c ∈ C a un estanque o APR.
-model.addConstrs(((DE_rd[d, r] <= quicksum(quicksum(LE[c, d, r, v] for v in V) for c in C)) for r in R for d in D), name="R3.1")
-model.addConstrs(((DA_pd[d, p] <= quicksum(quicksum(LEA[c, d, p, v] for v in V) for c in C)) for p in P for d in D), name="R3.2")
+model.addConstrs(((DE_rd[d][r] <= quicksum(quicksum(LE[c, d, r, v] for v in V) for c in C)) for r in R for d in D), name="R3.1")
+model.addConstrs(((DA_pd[d][p] <= quicksum(quicksum(LEA[c, d, p, v] for v in V) for c in C)) for p in P for d in D), name="R3.2")
 
 #4. La cantidad de litros de agua que se cargan en un centro a in A en un camion c in C en dia d in D debe ser menor o igual a la oferta del centro a in A en dia d in D.
 model.addConstrs(((quicksum(quicksum(quicksum(LC[c, a, d, v] for c in C) for v in V)for d in D) <= O_a[a])for a in A ), name="R4")
-
+'''
 #5. Los litros de agua cargados al camion c in C en un centro a in A en el dia d in D deben ser iguales a los litros totales entregados a APR p in P y estanques r in R por un camion c in C en el dia d in D.
 model.addConstrs(((quicksum(quicksum(LC[c, a, d, v] for v in V)for a in A) == quicksum(quicksum(LE[c, d, r, v] for v in V)for r in R) + quicksum(quicksum(LEA[c, d, p, v] for v in V)for p in P))for c in C for d in D),name="R5")
 
@@ -114,7 +117,7 @@ model.addConstrs(((quicksum(quicksum(LC[c, a, d, v] for v in V)for a in A) == qu
 model.addConstrs(((I[c,d,v] == I[c,d,v-1]+ quicksum(LC[c,a,d,v] for a in A) - quicksum(LE[c,d,r,v] for r in R)- quicksum(LEA[c,d,p,v] for p in P))for c in C for d in D for v in range(2,14)), name = "R6.1")  #igual revisar
 model.addConstrs(((I[c,d,1] == quicksum(LC[c,a,d,1] for a in A) - quicksum(LE[c,d,r,1] for r in R)- quicksum(LEA[c,d,p,1] for p in P))for c in C for d in D ), name = "R6.2")
 model.addConstrs(((I[c,d,v] <= K_c*X[c,a,d])for c in C for a in A for d in D for v in V), name = "R6.3")
-'''
+
 #7. ARREGLAR!!!!! Si se activa el sensor de un estanque r in R que no se ha llenado en algun dia d in D, se va a llenar.
 model.addConstrs((Kr[r, d, s] == Y[c, d + 1, r]for c in C for r in R for d in range(1, 7) for s in S),name="R7")
 model.addConstrs((Kr[r, 7, s] == Y[c, 1, r]for c in C for r in R for s in S if s + 1 <= len(S)),name="R7.1")
@@ -125,14 +128,14 @@ model.addConstrs((Kp[p, d, s] == Z[c, d + 1, p] for c in C for p in P for d in r
 model.addConstrs((Kp[p, 7, s] == Z[c, 1, p] for c in C for p in P for s in S),name="R8.2")
 '''
 #9. Activacion del sensor del estanque r in R en el dia d in D; si el inventario esta a menos o igual que el 40% de su capacidad, el sensor debe activarse. 
-model.addConstrs(((IE[r,d] <= 0.4*KE_r.iloc[r] + 60000*(1-Kr[r,d]))for r in R for d in D),name="R9.1")
-model.addConstrs(((IE[r,d] == IE[r,d-1] - (quicksum(quicksum(LE[c,d,r,v] for v in V)for c in C)-DE_rd[d,r])) for r in R for d in range(2,366)), name = "R9.2")
-model.addConstrs(((IE[r,1] == AIE_r.iloc[r] - (quicksum(quicksum(LE[c,1,r,v] for v in V)for c in C)-DE_rd[1,r])) for r in R), name = "R9.3")
+model.addConstrs(((IE[r,d] <= 0.4*KE_r.iloc[r-1] + 60000*(1-Kr[r,d]))for r in R for d in D),name="R9.1")
+model.addConstrs(((IE[r,d] == IE[r,d-1] - (quicksum(quicksum(LE[c,d,r,v] for v in V)for c in C)-DE_rd[d][r])) for r in R for d in range(2,10)), name = "R9.2")
+model.addConstrs(((IE[r,1] == AIE_r.iloc[r-1] - (quicksum(quicksum(LE[c,1,r,v] for v in V)for c in C)-DE_rd[1][r])) for r in R), name = "R9.3")
 
 #10. Activacion del sensor del APR p in P en el dia d in D; si el inventario esta a menos o igual que el 40% de su capacidad, el sensor debe activarse. 
 model.addConstrs(((IA[p,d] <= 0.4*KA_p[p] + 60000*(1-Kp[p,d]))for p in P for d in D),name="R10.1")
-model.addConstrs(((IA[p,d] == IA[p,d-1] - (quicksum(quicksum(LEA[c,d,p,v] for v in V)for c in C)-DA_pd[p,d])) for p in P for d in range(2,366)), name = "R10.2")
-model.addConstrs(((IA[p,1] == AIA_p.iloc[p] - (quicksum(quicksum(LEA[c,1,p,v] for v in V)for c in C)-DA_pd[p,1])) for p in P), name = "R10.3")
+model.addConstrs(((IA[p,d] == IA[p,d-1] - (quicksum(quicksum(LEA[c,d,p,v] for v in V)for c in C)-DA_pd[p][d])) for p in P for d in range(2,10)), name = "R10.2")
+model.addConstrs(((IA[p,1] == AIA_p.iloc[p-1] - (quicksum(quicksum(LEA[c,1,p,v] for v in V)for c in C)-DA_pd[p][1])) for p in P), name = "R10.3")
 
 #11. Si el camion c in C esta viajando a un destino el dia d in D, entonces este camion esta funcionando.
 model.addConstrs(((Y[c, d, r] == CF[c,d])for c in C for d in D for r in R),name="R11.1")
@@ -162,12 +165,11 @@ model.addConstrs(((quicksum(U[c,i,j,d,v] for (i,j) in DEl6) >= Z[c,d,p])for c in
 
 # Optimizar el modelo
 #función objetivo
-obj = quicksum(
-    quicksum(
-        (CD / CPL) * (                                                                                                            #------>
-            quicksum(L_m[i][j] * U[c, i, j, d] for i, j in M for d in D) +  # Descomponer `m` en `i, j`
-            quicksum(LC[c, a, d] * PA_a[a] for a in A for d in D)   # Litros cargados y costo por agua
-        ) + 2 * lmbda for c in C))  
+obj =(CD / CPL) * (
+            quicksum(L_m[i][j] * U[c,i,j,d,v] for (i, j) in M for c in C for d in D for v in V) +  # Descomponer m en i, j
+            quicksum(LC[c, a, d, v] * PA_a[a] for a in A for d in D for c in C for v in V)    # Litros cargados y costo por agua
+        ) + 2 * lambda1 * 20
+
 
 # Definir la función objetivo
 model.setObjective(obj, GRB.MINIMIZE)
